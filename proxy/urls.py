@@ -21,3 +21,8 @@ from . import views
 urlpatterns = [
     url(r'^matomo_api/', views.matomo_api, name='matomo_api'),
 ]
+
+# when accessing "/", show a list of available endpoints
+urlpatterns += [
+    path('', views.api_root),
+]

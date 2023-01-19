@@ -15,3 +15,9 @@ def matomo_api(request):
         return JsonResponse(response.json(), safe=False)
     else:
         return HttpResponse(status=response.status_code)
+    # when not providing any params, view a list of possible parameters
+
+def api_root(request):
+    return JsonResponse({
+        'matomo_api': request.build_absolute_uri('matomo_api'),
+    })
