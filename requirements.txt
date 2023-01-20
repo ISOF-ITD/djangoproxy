@@ -1,3 +1,4 @@
 django==3.2
 # https://docs.python-requests.org/en/master/
-requests==2.28.2
+# latest working version with python 3.6
+requests==2.27.1
