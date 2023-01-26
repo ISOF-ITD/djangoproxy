@@ -5,7 +5,13 @@ Use the proxy view to proxy requests to (internal) servers. This is useful when 
 
 ## Add a proxy view
 
-Example for a proxy view that proxies requests to the example.com server:
+Example for a proxy view that proxies requests to the example.com server and adds an authentication token to the request:
+
+**secret_env.py**:
+
+```python
+example_auth_token = '1234567890'
+```
 
 **urls.py**:
 
@@ -22,10 +28,24 @@ def example_api(request):
     url = 'http://example.com/api/'
     params = request.GET.copy()
     # add params to the request
-    params['param1'] = 'value1'
+    params['auth_token'] = secrets_env.example_auth_token
     response = requests.get(url, params=params)
     if response.status_code == 200:
         return JsonResponse(response.json(), safe=False)
     else:
         return HttpResponse(status=response.status_code)
+```
+
+## Call the proxy view
+
+```javascript
+$.ajax({
+    url: 'https://djangoproxy.isof.se/example_api/',
+    data: {
+        param2: 'value2'
+    },
+    success: function(data) {
+        console.log(data);
+    }
+});
 ```
