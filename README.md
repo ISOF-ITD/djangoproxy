@@ -36,16 +36,11 @@ def example_api(request):
         return HttpResponse(status=response.status_code)
 ```
 
-## Call the proxy view
+## Call the proxy view with React
 
-```javascript
-$.ajax({
-    url: 'https://djangoproxy.isof.se/example_api/',
-    data: {
-        param2: 'value2'
-    },
-    success: function(data) {
-        console.log(data);
-    }
-});
+```javascript	
+fetch('https://djangoproxy.isof.se/example_api/?param1=value1&param2=value2')
+    .then(response => response.json())
+    .then(data => console.log(data));
 ```
+
