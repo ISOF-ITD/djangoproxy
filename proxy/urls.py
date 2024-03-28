@@ -20,6 +20,7 @@ from . import views
 
 urlpatterns = [
     url(r'^matomo_api/', views.matomo_api, name='matomo_api'),
+    url(r'^folke_kontext_api/', views.folke_kontext_api, name='folke_kontext_api'),
 ]
 
 # when accessing "/", show a list of available endpoints
