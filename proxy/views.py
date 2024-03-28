@@ -59,7 +59,7 @@ def folke_kontext_api(request):
         # Find all <a> and <img> tags to update their 'href' and 'src' attributes
         for a in soup.find_all('a', href=True):
             if not a['href'].startswith(('http://', 'https://', '//')):
-                a['href'] = base_url + a['href'].lstrip('/')
+                a['href'] = full_url + "?path=" + a['href'].lstrip('/')
                 
         for img in soup.find_all('img', src=True):
             if not img['src'].startswith(('http://', 'https://', '//')):
