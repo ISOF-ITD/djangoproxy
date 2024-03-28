@@ -1,3 +1,4 @@
+import mimetypes
 from django.http import JsonResponse, HttpResponse
 import requests
 
@@ -32,39 +33,41 @@ def matomo_api(request):
         return HttpResponse(status=response.status_code)
     # when not providing any params, view a list of possible parameters
 
+
 def folke_kontext_api(request):
     """
     Returns the content from the isof-sitevision-path that is specified
-    in the params "path". Dynamically sets the content-type based on the
-    response from the external server.
+    in the params "path" with an appropriate MIME type.
     """
-    path = request.GET.get('path')
-    
+    path = request.GET.get("path")
+
     if not path:
-        return JsonResponse({'error': 'Missing path parameter'}, status=400)
-    
+        return JsonResponse({"error": "Missing path parameter"}, status=400)
+
     try:
         base_url = "https://www.isof.se/"
         full_url = f"{base_url}{path}"
-        
+
         # Set a timeout for the request
         response = requests.get(full_url, timeout=10)
-        
-        # Dynamically determine content-type from the external response
-        content_type = response.headers.get('Content-Type', 'text/html')
-        
-        # This will raise an HTTPError for bad responses
-        response.raise_for_status()
-        
-        return HttpResponse(response.content, content_type=content_type)
-    
-    except requests.exceptions.Timeout:
-        return JsonResponse({'error': 'The request timed out'}, status=504)
-    except requests.exceptions.HTTPError as e:
-        return JsonResponse({'error': f'HTTP Error: {e}'}, status=e.response.status_code)
-    except requests.exceptions.RequestException as e:
-        return JsonResponse({'error': f'Request exception: {e}'}, status=500)
 
+        # Guess the MIME type based on the file extension
+        mime_type, _ = mimetypes.guess_type(full_url)
+        if mime_type is None:
+            # Default to 'text/html' if MIME type could not be guessed
+            mime_type = "text/html"
+
+        response.raise_for_status()  # This will raise an HTTPError for bad responses
+        return HttpResponse(response.content, content_type=mime_type)
+
+    except requests.exceptions.Timeout:
+        return JsonResponse({"error": "The request timed out"}, status=504)
+    except requests.exceptions.HTTPError as e:
+        return JsonResponse(
+            {"error": f"HTTP Error: {e}"}, status=e.response.status_code
+        )
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({"error": f"Request exception: {e}"}, status=500)
 
 
 def api_root(request):
