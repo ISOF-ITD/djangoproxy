@@ -1,6 +1,7 @@
 import mimetypes
 from django.http import JsonResponse, HttpResponse
 import requests
+from bs4 import BeautifulSoup
 
 import secrets_env
 
@@ -50,6 +51,19 @@ def folke_kontext_api(request):
 
         # Set a timeout for the request
         response = requests.get(full_url, timeout=10)
+        response.raise_for_status()  # This will raise an HTTPError for bad responses
+
+        # Parse the response content with BeautifulSoup
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        # Find all <a> and <img> tags to update their 'href' and 'src' attributes
+        for link in soup.find_all('a', href=True):
+            if not link['href'].startswith(('http://', 'https://', '//')):
+                link['href'] = base_url + link['href'].lstrip('/')
+                
+        for img in soup.find_all('img', src=True):
+            if not img['src'].startswith(('http://', 'https://', '//')):
+                img['src'] = base_url + img['src'].lstrip('/')
 
         # Guess the MIME type based on the file extension
         mime_type, _ = mimetypes.guess_type(full_url)
@@ -57,8 +71,8 @@ def folke_kontext_api(request):
             # Default to 'text/html' if MIME type could not be guessed
             mime_type = "text/html"
 
-        response.raise_for_status()  # This will raise an HTTPError for bad responses
-        return HttpResponse(response.content, content_type=mime_type)
+        # Return modified HTML content
+        return HttpResponse(str(soup), content_type=mime_type)
 
     except requests.exceptions.Timeout:
         return JsonResponse({"error": "The request timed out"}, status=504)

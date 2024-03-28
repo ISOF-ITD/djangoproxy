@@ -3,3 +3,4 @@ django==3.2
 # latest working version with python 3.6
 requests==2.27.1
 django-cors-headers==3.10.1
+bs4
