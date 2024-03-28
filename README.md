@@ -3,7 +3,7 @@ Django application that acts as reverse proxy.
 
 Use the proxy view to proxy requests to (internal) servers. This is useful when you want to make requests to internal servers from the browser. The proxy view will add the authentication token or any other param or header to the request and forward it to the internal server.
 
-The address of the proxy view is https://djangoproxy.isof.se/ and https://djangoproxy-test.isof.se/proxy/ .
+The address of the proxy view is https://djangoproxy.isof.se/ and https://djangoproxy-test.isof.se/ .
 
 For a list of proxy instances on Apache level, see [wiki](https://sprakochfolkminnen.atlassian.net/l/cp/1mfALdJ3).
 
