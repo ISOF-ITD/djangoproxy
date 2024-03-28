@@ -24,11 +24,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = secrets_env.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [secrets_env.allowed_host, u'127.0.0.1', u'localhost']
 
-CORS_ORIGIN_ALLOW_ALL = True if DEBUG else False
+CORS_ORIGIN_ALLOW_ALL = True
 
 # Application definition
 
@@ -55,6 +55,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'proxy.urls'
 
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -71,8 +73,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'proxy.wsgi.application'
 
+WSGI_APPLICATION = 'proxy.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
