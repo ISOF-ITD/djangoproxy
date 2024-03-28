@@ -57,13 +57,21 @@ def folke_kontext_api(request):
         soup = BeautifulSoup(response.content, 'html.parser')
 
         # Find all <a> and <img> tags to update their 'href' and 'src' attributes
-        for link in soup.find_all('a', href=True):
-            if not link['href'].startswith(('http://', 'https://', '//')):
-                link['href'] = base_url + link['href'].lstrip('/')
+        for a in soup.find_all('a', href=True):
+            if not a['href'].startswith(('http://', 'https://', '//')):
+                a['href'] = base_url + a['href'].lstrip('/')
                 
         for img in soup.find_all('img', src=True):
             if not img['src'].startswith(('http://', 'https://', '//')):
                 img['src'] = base_url + img['src'].lstrip('/')
+
+        for script in soup.find_all('script', src=True):
+            if not script['src'].startswith(('http://', 'https://', '//')):
+                script['src'] = base_url + script['src'].lstrip('/')
+
+        for link in soup.find_all('link', href=True):
+            if not link['href'].startswith(('http://', 'https://', '//')):
+                link['href'] = base_url + link['href'].lstrip('/')
 
         # Guess the MIME type based on the file extension
         mime_type, _ = mimetypes.guess_type(full_url)
