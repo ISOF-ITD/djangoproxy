@@ -108,5 +108,6 @@ def api_root(request):
     return JsonResponse(
         {
             "matomo_api": request.build_absolute_uri("matomo_api"),
+            "folke_kontext_api": request.build_absolute_uri("folke_kontext_api")
         }
     )
