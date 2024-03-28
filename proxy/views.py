@@ -32,11 +32,11 @@ def matomo_api(request):
         return HttpResponse(status=response.status_code)
     # when not providing any params, view a list of possible parameters
 
-
 def folke_kontext_api(request):
     """
-    Returns the HTML-content from the isof-sitevision-path that is specified
-    in the params "path"
+    Returns the content from the isof-sitevision-path that is specified
+    in the params "path". Dynamically sets the content-type based on the
+    response from the external server.
     """
     path = request.GET.get('path')
     
@@ -50,18 +50,21 @@ def folke_kontext_api(request):
         # Set a timeout for the request
         response = requests.get(full_url, timeout=10)
         
-        response.raise_for_status()  # This will raise an HTTPError for bad responses
-        return HttpResponse(response.text, content_type="text/html")
+        # Dynamically determine content-type from the external response
+        content_type = response.headers.get('Content-Type', 'text/html')
+        
+        # This will raise an HTTPError for bad responses
+        response.raise_for_status()
+        
+        return HttpResponse(response.content, content_type=content_type)
     
     except requests.exceptions.Timeout:
         return JsonResponse({'error': 'The request timed out'}, status=504)
     except requests.exceptions.HTTPError as e:
-        # Handle different HTTP errors separately or all at once
         return JsonResponse({'error': f'HTTP Error: {e}'}, status=e.response.status_code)
     except requests.exceptions.RequestException as e:
-        # A base class for all requests' exceptions
-        # This can be used to catch all the specific exceptions
         return JsonResponse({'error': f'Request exception: {e}'}, status=500)
+
 
 
 def api_root(request):
