@@ -1,5 +1,6 @@
 import mimetypes
 from django.http import JsonResponse, HttpResponse
+from django.views.decorators.clickjacking import xframe_options_exempt
 import requests
 from bs4 import BeautifulSoup
 
@@ -34,7 +35,7 @@ def matomo_api(request):
         return HttpResponse(status=response.status_code)
     # when not providing any params, view a list of possible parameters
 
-
+@xframe_options_exempt
 def folke_kontext_api(request):
     """
     Returns the content from the isof-sitevision-path that is specified
