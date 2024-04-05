@@ -63,8 +63,25 @@ def folke_kontext_api(request):
                 a['href'] = "/folke_kontext_api?path=" + a['href'].lstrip('/')
                 
         for img in soup.find_all('img', src=True):
+            # Uppdatera src-attributet
             if not img['src'].startswith(('http://', 'https://', '//')):
                 img['src'] = base_url + img['src'].lstrip('/')
+
+            # Kontrollera och uppdatera srcset-attributet om det finns
+            if img.has_attr('srcset'):
+                new_srcset = []
+                # Dela upp srcset-värdet i en lista baserat på kommatecken
+                srcset_values = img['srcset'].split(',')
+                for value in srcset_values:
+                    # Dela upp varje värde vid mellanslag för att separera URL:en från storleksangivelsen
+                    parts = value.strip().split(' ')
+                    # Kontrollera och uppdatera URL:en om nödvändigt
+                    if not parts[0].startswith(('http://', 'https://', '//')):
+                        parts[0] = base_url + parts[0].lstrip('/')
+                    # Lägg till den uppdaterade URL:en och storleksangivelsen till new_srcset
+                    new_srcset.append(' '.join(parts))
+                # Uppdatera srcset-attributet med de modifierade värdena
+                img['srcset'] = ', '.join(new_srcset)
 
         for script in soup.find_all('script', src=True):
             if not script['src'].startswith(('http://', 'https://', '//')):
