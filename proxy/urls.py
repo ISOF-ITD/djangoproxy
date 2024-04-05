@@ -17,10 +17,12 @@ from django.urls import path
 from django.conf.urls import url
 
 from . import views
+from .matomo_api import matomo_api
+from .folke_kontext_api import folke_kontext_api
 
 urlpatterns = [
-    url(r'^matomo_api/', views.matomo_api, name='matomo_api'),
-    url(r'^folke_kontext_api/', views.folke_kontext_api, name='folke_kontext_api'),
+    url(r'^matomo_api/', matomo_api, name='matomo_api'),
+    url(r'^folke_kontext_api/', folke_kontext_api, name='folke_kontext_api'),
 ]
 
 # when accessing "/", show a list of available endpoints
