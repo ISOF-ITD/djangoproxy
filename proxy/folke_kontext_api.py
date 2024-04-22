@@ -31,7 +31,7 @@ def folke_kontext_api(request):
             if not a['href'].startswith(('http://', 'https://', '//')):
                 a['href'] = "/folke_kontext_api?path=" + a['href'].lstrip('/')
             else:
-                a['href'] = "/folke_kontext_api?path=" + a['href'].lstrip('https://www.isof.se/')
+                a['href'] = "/folke_kontext_api?path=" + a['href'].removeprefix('https://www.isof.se/')
                 
         for img in soup.find_all('img', src=True):
             # Uppdatera src-attributet
