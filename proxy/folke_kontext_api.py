@@ -23,73 +23,82 @@ def folke_kontext_api(request):
         response = requests.get(full_url, timeout=10)
         response.raise_for_status()  # This will raise an HTTPError for bad responses
 
-        # Parse the response content with BeautifulSoup
-        soup = BeautifulSoup(response.content, 'html.parser')
-
-        # Find all <a> and <img> tags to update their 'href' and 'src' attributes
-        for a in soup.find_all('a', href=True):
-            if not a['href'].startswith(('http://', 'https://', '//')):
-                a['href'] = "/folke_kontext_api?path=" + a['href'].lstrip('/')
-            else:
-                a['href'] = "/folke_kontext_api?path=" + a['href'].removeprefix('https://www.isof.se/')
-                
-        for img in soup.find_all('img', src=True):
-            # Uppdatera src-attributet
-            if not img['src'].startswith(('http://', 'https://', '//')):
-                img['src'] = base_url + img['src'].lstrip('/')
-
-            # Kontrollera och uppdatera srcset-attributet om det finns
-            if img.has_attr('srcset'):
-                new_srcset = []
-                # Dela upp srcset-värdet i en lista baserat på kommatecken
-                srcset_values = img['srcset'].split(',')
-                for value in srcset_values:
-                    # Dela upp varje värde vid mellanslag för att separera URL:en från storleksangivelsen
-                    parts = value.strip().split(' ')
-                    # Kontrollera och uppdatera URL:en om nödvändigt
-                    if not parts[0].startswith(('http://', 'https://', '//')):
-                        parts[0] = base_url + parts[0].lstrip('/')
-                    # Lägg till den uppdaterade URL:en och storleksangivelsen till new_srcset
-                    new_srcset.append(' '.join(parts))
-                # Uppdatera srcset-attributet med de modifierade värdena
-                img['srcset'] = ', '.join(new_srcset)
-
-        for script in soup.find_all('script', src=True):
-            if not script['src'].startswith(('http://', 'https://', '//')):
-                script['src'] = base_url + script['src'].lstrip('/')
-
-        for link in soup.find_all('link', href=True):
-            if not link['href'].startswith(('http://', 'https://', '//')):
-                link['href'] = base_url + link['href'].lstrip('/')
-
-        for use in soup.find_all('use', {'xlink:href': True}):
-            xlink_href = use['xlink:href']
-            if not xlink_href.startswith(('http://', 'https://', '//')):
-                use['xlink:href'] = "/folke_kontext_api?path=" + xlink_href.lstrip('/')
-            else:
-                use['xlink:href'] = "/folke_kontext_api?path=" + xlink_href.removeprefix('https://www.isof.se/')
-
-        # Kontrollera om det finns en <head> tagg, annars skapa en
-        head_tag = soup.head
-        if head_tag is None:
-            head_tag = soup.new_tag("head")
-            soup.html.insert(0, head_tag)
-
-        # Skapa och lägg till <script> taggen för iframe-postMessage i <head>
-        script_tag = soup.new_tag("script")
-        script_tag.string = """
-        window.parent.postMessage({ newSrc: window.location.href }, '*');
-        """
-        head_tag.append(script_tag)
-
         # Guess the MIME type based on the file extension
         mime_type, _ = mimetypes.guess_type(full_url)
         if mime_type is None:
             # Default to 'text/html' if MIME type could not be guessed
             mime_type = "text/html"
 
-        # Return modified HTML content
-        return HttpResponse(str(soup), content_type=mime_type)
+        # Handle HTML content
+        if mime_type == 'text/html':
+            soup = BeautifulSoup(response.content, 'html.parser')
+
+            # Find all <a> and <img> tags to update their 'href' and 'src' attributes
+            for a in soup.find_all('a', href=True):
+                if not a['href'].startswith(('http://', 'https://', '//')):
+                    a['href'] = "/folke_kontext_api?path=" + a['href'].lstrip('/')
+                else:
+                    a['href'] = "/folke_kontext_api?path=" + a['href'].removeprefix('https://www.isof.se/')
+                    
+            for img in soup.find_all('img', src=True):
+                # Uppdatera src-attributet
+                if not img['src'].startswith(('http://', 'https://', '//')):
+                    img['src'] = base_url + img['src'].lstrip('/')
+
+                # Kontrollera och uppdatera srcset-attributet om det finns
+                if img.has_attr('srcset'):
+                    new_srcset = []
+                    # Dela upp srcset-värdet i en lista baserat på kommatecken
+                    srcset_values = img['srcset'].split(',')
+                    for value in srcset_values:
+                        # Dela upp varje värde vid mellanslag för att separera URL:en från storleksangivelsen
+                        parts = value.strip().split(' ')
+                        # Kontrollera och uppdatera URL:en om nödvändigt
+                        if not parts[0].startswith(('http://', 'https://', '//')):
+                            parts[0] = base_url + parts[0].lstrip('/')
+                        # Lägg till den uppdaterade URL:en och storleksangivelsen till new_srcset
+                        new_srcset.append(' '.join(parts))
+                    # Uppdatera srcset-attributet med de modifierade värdena
+                    img['srcset'] = ', '.join(new_srcset)
+
+            for script in soup.find_all('script', src=True):
+                if not script['src'].startswith(('http://', 'https://', '//')):
+                    script['src'] = base_url + script['src'].lstrip('/')
+
+            for link in soup.find_all('link', href=True):
+                if not link['href'].startswith(('http://', 'https://', '//')):
+                    link['href'] = base_url + link['href'].lstrip('/')
+
+            for use in soup.find_all('use', {'xlink:href': True}):
+                xlink_href = use['xlink:href']
+                if not xlink_href.startswith(('http://', 'https://', '//')):
+                    use['xlink:href'] = "/folke_kontext_api?path=" + xlink_href.lstrip('/')
+                else:
+                    use['xlink:href'] = "/folke_kontext_api?path=" + xlink_href.removeprefix('https://www.isof.se/')
+
+            # Kontrollera om det finns en <head> tagg, annars skapa en
+            head_tag = soup.head
+            if head_tag is None:
+                head_tag = soup.new_tag("head")
+                soup.html.insert(0, head_tag)
+
+            # Skapa och lägg till <script> taggen för iframe-postMessage i <head>
+            script_tag = soup.new_tag("script")
+            script_tag.string = """
+            window.parent.postMessage({ newSrc: window.location.href }, '*');
+            """
+            head_tag.append(script_tag)
+
+            # Return modified HTML content
+            return HttpResponse(str(soup), content_type=mime_type)
+
+        # Handle CSS and SVG directly
+        elif mime_type in ['text/css', 'image/svg+xml']:
+            return HttpResponse(response.content, content_type=mime_type)
+
+        else:
+            # Return the response content for other types
+            return HttpResponse(response.content, content_type=mime_type)
 
     except requests.exceptions.Timeout:
         return JsonResponse({"error": "The request timed out"}, status=504)
