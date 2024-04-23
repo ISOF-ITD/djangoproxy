@@ -63,7 +63,9 @@ def folke_kontext_api(request):
 
             for script in soup.find_all('script', src=True):
                 if not script['src'].startswith(('http://', 'https://', '//')):
-                    script['src'] = base_url + script['src'].lstrip('/')
+                    script['src'] = "/folke_kontext_api?path=" + script['src'].lstrip('/')
+                else:
+                    script['src'] = "/folke_kontext_api?path=" + script['src'].removeprefix('https://www.isof.se/')
 
             for link in soup.find_all('link', href=True):
                 if not link['href'].startswith(('http://', 'https://', '//')):
