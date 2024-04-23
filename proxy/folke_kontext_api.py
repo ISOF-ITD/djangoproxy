@@ -62,6 +62,13 @@ def folke_kontext_api(request):
             if not link['href'].startswith(('http://', 'https://', '//')):
                 link['href'] = base_url + link['href'].lstrip('/')
 
+        for use in soup.find_all('use', {'xlink:href': True}):
+            xlink_href = use['xlink:href']
+            if not xlink_href.startswith(('http://', 'https://', '//')):
+                use['xlink:href'] = "/folke_kontext_api?path=" + xlink_href.lstrip('/')
+            else:
+                use['xlink:href'] = "/folke_kontext_api?path=" + xlink_href.removeprefix('https://www.isof.se/')
+
         # Guess the MIME type based on the file extension
         mime_type, _ = mimetypes.guess_type(full_url)
         if mime_type is None:
