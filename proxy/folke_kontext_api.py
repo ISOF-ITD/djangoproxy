@@ -3,6 +3,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.clickjacking import xframe_options_exempt
 import requests
 from bs4 import BeautifulSoup
+import re
 
 @xframe_options_exempt
 def folke_kontext_api(request):
@@ -98,7 +99,11 @@ def folke_kontext_api(request):
 
         # Handle CSS and SVG directly
         elif mime_type in ['text/css', 'image/svg+xml']:
-            return HttpResponse(response.content, content_type=mime_type)
+            if mime_type == 'text/css':
+                modified_css = modify_css_urls(response.content.decode('utf-8'), base_url)
+                return HttpResponse(modified_css, content_type=mime_type)
+            else:
+                return HttpResponse(response.content, content_type=mime_type)
 
         else:
             # Return the response content for other types
@@ -112,3 +117,25 @@ def folke_kontext_api(request):
         )
     except requests.exceptions.RequestException as e:
         return JsonResponse({"error": f"Request exception: {e}"}, status=500)
+    
+def modify_css_urls(css_content):
+    url_pattern = re.compile(r'url\(([^)]+)\)')
+
+    def url_replacer(match):
+        url = match.group(1).strip('\'"')  # Ta bort eventuella citationstecken runt URL:en
+
+        # Hantera data-URI och andra scheman som inte bör modifieras
+        if url.startswith(('data:', 'about:', '#')):
+            return f'url({url})'
+
+        # Modifiera URL för absoluta och relativa länkar
+        if not url.startswith(('http://', 'https://', '//')):
+            # Hantera relativa URL:er
+            return f'url(/folke_kontext_api?path={url.lstrip("/")})'
+        else:
+            # Hantera absoluta URL:er men ta bort en specifik bas-URL om den finns
+            new_url = url.removeprefix('https://www.isof.se/')
+            return f'url(/folke_kontext_api?path={new_url})'
+
+    # Använd re.sub för att ersätta alla instanser effektivt
+    return url_pattern.sub(url_replacer, css_content)
