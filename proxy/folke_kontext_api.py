@@ -69,6 +69,19 @@ def folke_kontext_api(request):
             else:
                 use['xlink:href'] = "/folke_kontext_api?path=" + xlink_href.removeprefix('https://www.isof.se/')
 
+        # Kontrollera om det finns en <head> tagg, annars skapa en
+        head_tag = soup.head
+        if head_tag is None:
+            head_tag = soup.new_tag("head")
+            soup.html.insert(0, head_tag)
+
+        # Skapa och lägg till <script> taggen för iframe-postMessage i <head>
+        script_tag = soup.new_tag("script")
+        script_tag.string = """
+        window.parent.postMessage({ newSrc: window.location.href }, '*');
+        """
+        head_tag.append(script_tag)
+
         # Guess the MIME type based on the file extension
         mime_type, _ = mimetypes.guess_type(full_url)
         if mime_type is None:
