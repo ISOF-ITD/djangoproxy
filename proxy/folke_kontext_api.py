@@ -3,6 +3,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.clickjacking import xframe_options_exempt
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import urlparse, unquote
 
 @xframe_options_exempt
 def folke_kontext_api(request):
@@ -11,6 +12,19 @@ def folke_kontext_api(request):
     in the params "path" with an appropriate MIME type.
     """
     path = request.GET.get("path")
+    
+    def guess_mime_type(url):
+        # Använder urlparse för att dela upp URL:en i komponenter
+        parsed_url = urlparse(url)
+        # Hämtar vägen till filen och avkodar eventuell URL-kodning
+        path = unquote(parsed_url.path)
+        # Använder endast filnamnet efter den sista slashen för MIME-typgissning
+        mime_type, _ = mimetypes.guess_type(path)
+        if path.endswith('.woff'):
+            mime_type = 'font/woff'
+        elif path.endswith('.woff2'):
+            mime_type = 'font/woff2'
+        return mime_type
 
     if not path:
         return JsonResponse({"error": "Missing path parameter"}, status=400)
@@ -24,7 +38,7 @@ def folke_kontext_api(request):
         response.raise_for_status()  # This will raise an HTTPError for bad responses
 
         # Guess the MIME type based on the file extension
-        mime_type, _ = mimetypes.guess_type(full_url)
+        mime_type = guess_mime_type(full_url)
         if mime_type is None:
             # Default to 'text/html' if MIME type could not be guessed
             mime_type = "text/html"
@@ -41,7 +55,10 @@ def folke_kontext_api(request):
                     a['href'] = "/folke_kontext_api?path=" + a['href'].removeprefix('https://www.isof.se/')
                     
             for img in soup.find_all('img', src=True):
-                # Uppdatera src-attributet
+                # Kontrollera om src-attributet är en data-URI
+                if img['src'].startswith('data:image'):
+                    continue  # Hoppa över dessa eftersom de inte behöver ändras
+
                 if not img['src'].startswith(('http://', 'https://', '//')):
                     img['src'] = base_url + img['src'].lstrip('/')
 
@@ -54,7 +71,7 @@ def folke_kontext_api(request):
                         # Dela upp varje värde vid mellanslag för att separera URL:en från storleksangivelsen
                         parts = value.strip().split(' ')
                         # Kontrollera och uppdatera URL:en om nödvändigt
-                        if not parts[0].startswith(('http://', 'https://', '//')):
+                        if not parts[0].startswith(('http://', 'https://', '//', 'data:image')):
                             parts[0] = base_url + parts[0].lstrip('/')
                         # Lägg till den uppdaterade URL:en och storleksangivelsen till new_srcset
                         new_srcset.append(' '.join(parts))
@@ -96,8 +113,33 @@ def folke_kontext_api(request):
             # Return modified HTML content
             return HttpResponse(str(soup), content_type=mime_type)
 
-        # Handle CSS and SVG directly
-        elif mime_type in ['text/css', 'image/svg+xml']:
+        # Handle CSS content
+        elif mime_type == 'text/css':
+            # Läs in CSS-innehållet som en sträng
+            css_content = response.content.decode('utf-8')
+
+            # Använd reguljära uttryck för att hitta och ersätta alla URL-vägar
+            import re
+            url_pattern = re.compile(r'url\(([^)]+)\)')
+            
+            def replace_url(match):
+                url = match.group(1).strip('\'"')  # Ta bort eventuella citationstecken runt URL:en
+                if url.startswith('data:image'):
+                    return f'url("{url}")'  # Returnera data-URI oförändrad
+                if not url.startswith(('http://', 'https://', '//')):
+                    new_url = "/folke_kontext_api?path=" + url.lstrip('/')
+                else:
+                    new_url = "/folke_kontext_api?path=" + url.removeprefix('https://www.isof.se/')
+                return f'url("{new_url}")'
+
+            # Ersätt alla förekomster av URL:er i CSS-innehållet
+            modified_css = url_pattern.sub(replace_url, css_content)
+
+            # Returnera det modifierade CSS-innehållet
+            return HttpResponse(modified_css, content_type='text/css')
+        
+        # Handle SVG directly
+        elif mime_type == 'image/svg+xml':
             return HttpResponse(response.content, content_type=mime_type)
 
         else:
