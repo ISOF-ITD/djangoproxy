@@ -37,6 +37,10 @@ def folke_kontext_api(request):
         response = requests.get(full_url, timeout=10)
         response.raise_for_status()  # This will raise an HTTPError for bad responses
 
+        # Remove cookies from headers
+        if 'Set-Cookie' in response.headers:
+            del response.headers['Set-Cookie']
+
         # Guess the MIME type based on the file extension
         mime_type = guess_mime_type(full_url)
         if mime_type is None:
@@ -46,6 +50,11 @@ def folke_kontext_api(request):
         # Handle HTML content
         if mime_type == 'text/html':
             soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Remove or modify scripts handling cookies
+            for script in soup.find_all('script'):
+                if "cookie" in script.text.lower():  # Simple way to identify scripts that handle cookies
+                    script.decompose()  # Remove the script tag from the soup object
 
             # Find all <a> and <img> tags to update their 'href' and 'src' attributes
             for a in soup.find_all('a', href=True):
@@ -109,7 +118,7 @@ def folke_kontext_api(request):
             window.parent.postMessage({ newSrc: window.location.href }, '*');
             """
             head_tag.append(script_tag)
-
+            
             # Return modified HTML content
             return HttpResponse(str(soup), content_type=mime_type)
 
