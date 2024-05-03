@@ -158,8 +158,20 @@ def folke_kontext_api(request):
     except requests.exceptions.Timeout:
         return JsonResponse({"error": "The request timed out"}, status=504)
     except requests.exceptions.HTTPError as e:
-        return JsonResponse(
-            {"error": f"HTTP Error: {e}"}, status=e.response.status_code
-        )
+    # Antag att `e.response.status_code` innehåller statuskoden från det felande HTTP-anropet
+        html_response = f"""
+        <html>
+            <body>
+                <script>
+                    // Skicka meddelande till föräldrafönstret med statuskoden och eventuellt felmeddelande
+                    window.parent.postMessage({{
+                        'status': {e.response.status_code},
+                        'error': 'HTTP Error: {e}'
+                    }}, '*');
+                </script>
+            </body>
+        </html>
+        """
+        return HttpResponse(html_response, status=e.response.status_code)
     except requests.exceptions.RequestException as e:
         return JsonResponse({"error": f"Request exception: {e}"}, status=500)
