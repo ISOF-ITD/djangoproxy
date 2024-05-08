@@ -58,10 +58,12 @@ def folke_kontext_api(request):
 
             # Find all <a> and <img> tags to update their 'href' and 'src' attributes
             for a in soup.find_all('a', href=True):
-                if not a['href'].startswith(('http://', 'https://', '//')):
-                    a['href'] = "/folke_kontext_api?path=" + a['href'].lstrip('/')
-                else:
-                    a['href'] = "/folke_kontext_api?path=" + a['href'].removeprefix('https://www.isof.se/')
+                # Change link href only if it's not an external link
+                if a.get('target') != '_blank' or link.get('rel') != 'external':
+                    if not a['href'].startswith(('http://', 'https://', '//')):
+                        a['href'] = "/folke_kontext_api?path=" + a['href'].lstrip('/')
+                    else:
+                        a['href'] = "/folke_kontext_api?path=" + a['href'].removeprefix('https://www.isof.se/')
                     
             for img in soup.find_all('img', src=True):
                 # Kontrollera om src-attributet är en data-URI
@@ -93,13 +95,11 @@ def folke_kontext_api(request):
                 else:
                     script['src'] = "/folke_kontext_api?path=" + script['src'].removeprefix('https://www.isof.se/')
 
-            for link in soup.find_all('link', href=True):
-                # Kontrollera om link-taggen öppnas i en ny flik
-                if link.get('target') != '_blank' or link.get('rel') != 'external':
-                    if not link['href'].startswith(('http://', 'https://', '//')):
-                        link['href'] = "/folke_kontext_api?path=" + link['href'].lstrip('/')
-                    else:
-                        link['href'] = "/folke_kontext_api?path=" + link['href'].removeprefix('https://www.isof.se/')
+            for link in soup.find_all('link', href=True):                
+                if not link['href'].startswith(('http://', 'https://', '//')):
+                    link['href'] = "/folke_kontext_api?path=" + link['href'].lstrip('/')
+                else:
+                    link['href'] = "/folke_kontext_api?path=" + link['href'].removeprefix('https://www.isof.se/')
 
             for use in soup.find_all('use', {'xlink:href': True}):
                 xlink_href = use['xlink:href']
