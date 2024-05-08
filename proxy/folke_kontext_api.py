@@ -95,7 +95,7 @@ def folke_kontext_api(request):
 
             for link in soup.find_all('link', href=True):
                 # Kontrollera om link-taggen öppnas i en ny flik
-                if link.get('target') != '_blank':
+                if link.get('target') != '_blank' or link.get('rel') != 'external':
                     if not link['href'].startswith(('http://', 'https://', '//')):
                         link['href'] = "/folke_kontext_api?path=" + link['href'].lstrip('/')
                     else:
