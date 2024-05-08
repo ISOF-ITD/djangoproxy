@@ -59,7 +59,7 @@ def folke_kontext_api(request):
             # Find all <a> and <img> tags to update their 'href' and 'src' attributes
             for a in soup.find_all('a', href=True):
                 # Change link href only if it's not an external link
-                if a.get('target') != '_blank' or link.get('rel') != 'external':
+                if a.get('target') != '_blank' or a.get('rel') != 'external':
                     if not a['href'].startswith(('http://', 'https://', '//')):
                         a['href'] = "/folke_kontext_api?path=" + a['href'].lstrip('/')
                     else:
