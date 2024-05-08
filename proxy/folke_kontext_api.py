@@ -60,10 +60,11 @@ def folke_kontext_api(request):
             for a in soup.find_all('a', href=True):
                 # Kontrollera om länken har attributet rel="external" eller target="_blank"
                 if 'external' in a.get('rel', '') or a.get('target') == '_blank':
-                    continue  # Hoppa över länkar som ska öppnas i en ny flik eller ett nytt fönster
-                
+                    # är det absoluta länkar, bevara dem, annars lägg till https://www.isof.se
+                    if not a['href'].startswith(('http://', 'https://', '//')):
+                        a['href'] = "https://www.isof.se" + a['href'].lstrip('/')    
                 # Omvandla länkens href attribut beroende på om den börjar med en protokollangivelse
-                if not a['href'].startswith(('http://', 'https://', '//')):
+                elif not a['href'].startswith(('http://', 'https://', '//')):
                     a['href'] = "/folke_kontext_api?path=" + a['href'].lstrip('/')
                 else:
                     a['href'] = "/folke_kontext_api?path=" + a['href'].removeprefix('https://www.isof.se/')
