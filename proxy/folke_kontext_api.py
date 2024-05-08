@@ -58,12 +58,16 @@ def folke_kontext_api(request):
 
             # Find all <a> and <img> tags to update their 'href' and 'src' attributes
             for a in soup.find_all('a', href=True):
-                # Change link href only if it's not an external link
-                if a.get('target') != '_blank' or a.get('rel') != 'external':
-                    if not a['href'].startswith(('http://', 'https://', '//')):
-                        a['href'] = "/folke_kontext_api?path=" + a['href'].lstrip('/')
-                    else:
-                        a['href'] = "/folke_kontext_api?path=" + a['href'].removeprefix('https://www.isof.se/')
+                # Kontrollera om länken har attributet rel="external" eller target="_blank"
+                if 'external' in a.get('rel', '') or a.get('target') == '_blank':
+                    continue  # Hoppa över länkar som ska öppnas i en ny flik eller ett nytt fönster
+                
+                # Omvandla länkens href attribut beroende på om den börjar med en protokollangivelse
+                if not a['href'].startswith(('http://', 'https://', '//')):
+                    a['href'] = "/folke_kontext_api?path=" + a['href'].lstrip('/')
+                else:
+                    a['href'] = "/folke_kontext_api?path=" + a['href'].removeprefix('https://www.isof.se/')
+
                     
             for img in soup.find_all('img', src=True):
                 # Kontrollera om src-attributet är en data-URI
