@@ -62,7 +62,7 @@ def folke_kontext_api(request):
                 if 'external' in a.get('rel', '') or a.get('target') == '_blank':
                     # är det absoluta länkar, bevara dem, annars lägg till https://www.isof.se
                     if not a['href'].startswith(('http://', 'https://', '//')):
-                        a['href'] = "https://www.isof.se" + a['href'].lstrip('/')    
+                        a['href'] = "https://www.isof.se/" + a['href'].lstrip('/')    
                 # Omvandla länkens href attribut beroende på om den börjar med en protokollangivelse
                 elif not a['href'].startswith(('http://', 'https://', '//')):
                     a['href'] = "/folke_kontext_api?path=" + a['href'].lstrip('/')
