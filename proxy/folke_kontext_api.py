@@ -58,6 +58,8 @@ def folke_kontext_api(request):
 
             # Find all <a> and <img> tags to update their 'href' and 'src' attributes
             for a in soup.find_all('a', href=True):
+                if a['href'].startswith('mailto:'):
+                    continue
                 # Kontrollera om länken har attributet rel="external" eller target="_blank"
                 if 'external' in a.get('rel', '') or a.get('target') == '_blank':
                     # är det absoluta länkar, bevara dem, annars lägg till https://www.isof.se
