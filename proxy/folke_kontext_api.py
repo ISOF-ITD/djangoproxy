@@ -143,7 +143,7 @@ def folke_kontext_api(request):
             def replace_url(match):
                 url = match.group(1).strip('\'"')  # Ta bort eventuella citationstecken runt URL:en
                 if url.startswith('data:image'):
-                    return f'url("{url}")'  # Returnera data-URI oförändrad
+                    return f"url('{url}')"  # Returnera data-URI oförändrad
                 if not url.startswith(('http://', 'https://', '//')):
                     new_url = "/folke_kontext_api?path=" + url.lstrip('/')
                 else:
