@@ -1,4 +1,6 @@
 import mimetypes
+from django.conf import settings
+import os
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.clickjacking import xframe_options_exempt
 import requests
@@ -129,7 +131,7 @@ def folke_kontext_api(request):
             head_tag.append(script_tag)
             
             # Add the contents of the CSS file as inline styles in the <head> tag
-            css_file_path = "./folke_kontext_files/custom_styles.css"
+            css_file_path = os.path.join(settings.BASE_DIR, "folke_kontext", "folke_kontext_files", "custom_styles.css")
             with open(css_file_path, "r") as css_file:
                 css_content = css_file.read()
 
