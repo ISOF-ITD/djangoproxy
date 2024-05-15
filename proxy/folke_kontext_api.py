@@ -144,7 +144,7 @@ def folke_kontext_api(request):
             minified_html = htmlmin.minify(str(soup), remove_empty_space=True)
             
             # Return modified HTML content
-            return HttpResponse(str(soup), content_type=mime_type)
+            return HttpResponse(minified_html, content_type=mime_type)
 
         # Handle CSS content
         elif mime_type == 'text/css':
