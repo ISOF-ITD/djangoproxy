@@ -6,6 +6,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, unquote
+import htmlmin
 
 @xframe_options_exempt
 def folke_kontext_api(request):
@@ -138,6 +139,9 @@ def folke_kontext_api(request):
             style_tag = soup.new_tag("style")
             style_tag.string = css_content
             head_tag.append(style_tag)
+            
+            # Minify the HTML content
+            minified_html = htmlmin.minify(str(soup), remove_empty_space=True)
             
             # Return modified HTML content
             return HttpResponse(str(soup), content_type=mime_type)

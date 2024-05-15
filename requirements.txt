@@ -4,3 +4,4 @@ django==3.2
 requests==2.27.1
 django-cors-headers==3.10.1
 bs4
+htmlmin
