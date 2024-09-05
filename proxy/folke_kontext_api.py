@@ -128,7 +128,7 @@ def folke_kontext_api(request):
             link_tag = soup.new_tag("link")
             link_tag.attrs = {
                 "rel": "preload",
-                "href": "/folke_kontext_api/?path=webdav/files/system/fonts/barlow-condensed/barlow-condensed-v4-latin-500.woff2",
+                "href": "/folke_kontext_api?path=webdav/files/system/fonts/barlow-condensed/barlow-condensed-v4-latin-500.woff2",
                 "as": "font",
                 "type": "font/woff2",
                 "crossorigin": "anonymous"
