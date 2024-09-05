@@ -124,11 +124,23 @@ def folke_kontext_api(request):
                 head_tag = soup.new_tag("head")
                 soup.html.insert(0, head_tag)
 
+            # Preload "Barlow Condensed" font
+            link_tag = soup.new_tag("link")
+            link_tag.attrs = {
+                "rel": "preload",
+                "href": "/folke_kontext_api/?path=webdav/files/system/fonts/barlow-condensed/barlow-condensed-v4-latin-500.woff2",
+                "as": "font",
+                "type": "font/woff2",
+                "crossorigin": "anonymous"
+            }
+
             # Skapa och lägg till <script> taggen för iframe-postMessage i <head>
             script_tag = soup.new_tag("script")
             script_tag.string = """
             window.parent.postMessage({ newSrc: window.location.href }, '*');
             """
+
+            head_tag.append(link_tag)
             head_tag.append(script_tag)
             
             # Add the contents of the CSS file as inline styles in the <head> tag
