@@ -168,8 +168,8 @@ def folke_kontext_api(request):
             # Ersätt alla förekomster av URL:er i CSS-innehållet
             modified_css = url_pattern.sub(replace_url, css_content)
 
-            # Ersätt font-display:swap med font-display:fallback
-            modified_css = modified_css.replace('font-display:swap', 'font-display:fallback')
+            # Ersätt font-display:swap med font-display:block
+            modified_css = modified_css.replace('font-display:swap', 'font-display:block')
 
             # Returnera det modifierade CSS-innehållet
             return HttpResponse(modified_css, content_type='text/css')
